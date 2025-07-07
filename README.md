@@ -1,5 +1,5 @@
 
-# 🏗️ OX GROUP – NestJS Backend Test Task
+#  OX GROUP – NestJS Backend Test Task
 
 Bu loyiha **OX GROUP** kompaniyasining texnik topshirig‘i asosida `NestJS` frameworkida ishlab chiqilgan bo‘lib, quyidagi funksiyalarni o‘z ichiga oladi:
 
