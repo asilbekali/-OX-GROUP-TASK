@@ -1,4 +1,11 @@
-import { Controller, Get, Query, UseGuards, Req } from '@nestjs/common';
+
+import {
+  Controller,
+  Get,
+  Query,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { ProductService } from './product.service';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 import { ManagerOnly } from '../auth/decorators/ manager-only.decorator';
