@@ -63,7 +63,17 @@ export class AuthService {
 
     const updatedUser = await this.prisma.user.findUnique({
       where: { id: user.id },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        oxToken: true,
+        companyId: true, 
+      },
     });
+
+    console.log("update user auth\n", updatedUser);
+    
 
     if (!updatedUser) {
       throw new UnauthorizedException('User not found after update');

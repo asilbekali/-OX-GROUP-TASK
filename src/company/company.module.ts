@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
-import { HttpModule } from '@nestjs/axios';
 import { CompanyService } from './company.service';
 import { CompanyController } from './company.controller';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaModule } from '../prisma/prisma.module';
+import { HttpModule } from '@nestjs/axios';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [HttpModule],
+  imports: [PrismaModule, HttpModule, JwtModule.register({})],
   controllers: [CompanyController],
-  providers: [CompanyService, PrismaService],
+  providers: [CompanyService],
 })
-export class CompanyModule {}// src/company/company.module.ts
-
+export class CompanyModule {}

@@ -1,9 +1,10 @@
-
 import {
   Injectable,
   UnauthorizedException,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterCompanyDto } from './dto/company.dto';
@@ -22,67 +23,95 @@ export class CompanyService {
     const { token, subdomain, name } = dto;
 
     try {
-      await firstValueFrom(
-        this.http.get(`https://${subdomain}.ox-sys.com/profile`, {
-          headers: {
-            Accept: 'application/json',
-            Authorization: token,
+      try {
+        await firstValueFrom(
+          this.http.get(`https://${subdomain}.ox-sys.com/profile`, {
+            headers: {
+              Accept: 'application/json',
+              Authorization: token,
+            },
+          }),
+        );
+      } catch (err) {
+        throw new UnauthorizedException(
+          'OX Token noto‘g‘ri yoki subdomain ishlamayapti',
+        );
+      }
+
+      const existingCompany = await this.prisma.company.findFirst({
+        where: {
+          OR: [{ name }, { subdomain }],
+        },
+      });
+
+      // Agar company mavjud bo‘lmasa => yaratamiz va user ADMIN bo‘ladi
+      if (!existingCompany) {
+        const newCompany = await this.prisma.company.create({
+          data: {
+            name,
+            subdomain,
           },
-        }),
-      );
-    } catch (err) {
-      throw new UnauthorizedException('Invalid OX Token');
-    }
+        });
 
-    const existing = await this.prisma.company.findUnique({
-      where: { name },
-    });
+        await this.prisma.user.update({
+          where: { id: user.id },
+          data: {
+            companyId: newCompany.id,
+            role: Role.ADMIN,
+          },
+        });
 
-    if (!existing) {
-      const newCompany = await this.prisma.company.create({
-        data: {
-          name,
-          subdomain,
-        },
-      });
+        return {
+          message:
+            'Kompaniya yaratildi. Foydalanuvchi ADMIN qilib biriktirildi',
+        };
+      }
 
+      // Agar company mavjud bo‘lsa => user MANAGER qilib biriktiriladi
       await this.prisma.user.update({
         where: { id: user.id },
         data: {
-          companyId: newCompany.id,
-          role: Role.ADMIN,
-        },
-      });
-
-      return { message: 'Company created. User set as ADMIN' };
-    } else {
-      await this.prisma.user.update({
-        where: { id: user.id },
-        data: {
-          companyId: existing.id,
+          companyId: existingCompany.id,
           role: Role.MANAGER,
         },
       });
 
-      return { message: 'User assigned as MANAGER to existing company' };
+      return {
+        message: 'Mavjud kompaniyaga MANAGER sifatida biriktirildi',
+      };
+    } catch (error) {
+      console.error('registerCompany xatolik:', error);
+
+      if (error instanceof UnauthorizedException) throw error;
+
+      throw new InternalServerErrorException(
+        'Kompaniya biriktirishda kutilmagan xatolik yuz berdi',
+      );
     }
   }
 
   async deleteCompany(companyId: number, user: any) {
-    const company = await this.prisma.company.findUnique({
-      where: { id: companyId },
-    });
+    try {
+      const company = await this.prisma.company.findUnique({
+        where: { id: companyId },
+      });
 
-    if (!company) {
-      throw new NotFoundException('Company not found');
+      if (!company) {
+        throw new NotFoundException('Kompaniya topilmadi');
+      }
+
+      if (user.role !== 'ADMIN' || user.companyId !== company.id) {
+        throw new ForbiddenException(
+          'Faqat o‘z kompaniyangizni o‘chirishingiz mumkin',
+        );
+      }
+
+      await this.prisma.company.delete({ where: { id: companyId } });
+
+      return { message: 'Kompaniya muvaffaqiyatli o‘chirildi' };
+    } catch (error) {
+      console.error('deleteCompany xatolik:', error);
+      throw error;
     }
-
-    if (user.role !== 'ADMIN' || user.companyId !== company.id) {
-      throw new ForbiddenException('You can only delete your own company');
-    }
-
-    await this.prisma.company.delete({ where: { id: companyId } });
-
-    return { message: 'Company deleted successfully' };
   }
 }

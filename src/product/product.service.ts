@@ -17,10 +17,9 @@ export class ProductService {
       throw new BadRequestException('Size cannot be greater than 20');
     }
 
-    console.log(user);
     
 
-    if (!user.companyId || !user.token) {
+    if (!user.companyId || !user.oxToken) {
       throw new UnauthorizedException(
         'User must be linked to a company with valid token  to access products',
       );
