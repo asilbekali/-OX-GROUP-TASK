@@ -4,7 +4,6 @@ import { JwtService } from '@nestjs/jwt';
 import { VerifyDto } from './dto/auth.dto';
 import { Role } from '@prisma/client';
 import { randomInt } from 'crypto';
-import { Request } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -37,15 +36,26 @@ export class AuthService {
       throw new UnauthorizedException('Invalid OTP');
     }
 
-    // Session yaratish
     await this.prisma.session.create({
       data: {
         userId: user.id,
-        viewerIp: '127.0.0.1', // keyinchalik real IP'ni req'dan olish mumkin
+        viewerIp: '127.0.0.1',
       },
     });
 
-    const token = this.jwtService.sign({ sub: user.id, role: user.role });
+    const token = this.jwtService.sign(
+      {
+        sub: user.id,
+        role: user.role,
+        companyId: user.companyId,
+        email: user.email,
+      },
+      {
+        secret: process.env.JWT_SECRET,
+        expiresIn: process.env.JWT_EXPIRES_IN,
+      },
+    );
+
     return { accessToken: token };
   }
 }

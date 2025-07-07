@@ -1,3 +1,7 @@
-import { Roles } from './roles.decorator';
+import { applyDecorators, UseGuards } from '@nestjs/common';
+import { RoleGuard } from '../guards/roles.guard';
+import { JwtAuthGuard } from '../guards/jwt.guard';
 
-export const AdminOnly = () => Roles('ADMIN');
+export function AdminOnly() {
+  return applyDecorators(UseGuards(JwtAuthGuard, new RoleGuard('ADMIN')));
+}

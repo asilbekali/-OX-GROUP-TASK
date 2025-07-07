@@ -1,41 +1,38 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
-  Patch,
-  Param,
+  UseGuards,
+  Req,
   Delete,
+  Param,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CompanyService } from './company.service';
-import { CreateCompanyDto } from './dto/register-company.dto';
+import { RegisterCompanyDto } from './dto/company.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { Request } from 'express';
+import { AdminOnly } from '../auth/decorators/admin-only.decorator';
 
-@Controller('company')
+@Controller()
 export class CompanyController {
   constructor(private readonly companyService: CompanyService) {}
 
-  @Post()
-  create(@Body() createCompanyDto: CreateCompanyDto) {
-    return this.companyService.create(createCompanyDto);
+  @UseGuards(JwtAuthGuard)
+  @Post('register-company')
+  async registerCompany(@Body() dto: RegisterCompanyDto, @Req() req: Request) {
+    const user = req.user as any;
+    return this.companyService.registerCompany(dto, user);
   }
 
-  @Get()
-  findAll() {
-    return this.companyService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.companyService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() CreateCompanyDto: CreateCompanyDto) {
-    return this.companyService.update(+id, CreateCompanyDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.companyService.remove(+id);
+  @UseGuards(JwtAuthGuard)
+  @AdminOnly()
+  @Delete('company/:id')
+  async deleteCompany(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+  ) {
+    const user = req.user as any;
+    return this.companyService.deleteCompany(id, user);
   }
 }
