@@ -1,11 +1,15 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class RegisterCompanyDto {
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsString()
+  @IsNotEmpty()
   token: string;
 
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   subdomain: string;
 }

@@ -1,12 +1,14 @@
+// src/company/company.controller.ts
+
 import {
   Controller,
   Post,
-  Body,
-  UseGuards,
-  Req,
   Delete,
+  Body,
   Param,
   ParseIntPipe,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { RegisterCompanyDto } from './dto/company.dto';

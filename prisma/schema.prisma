@@ -18,15 +18,15 @@ model User {
   email     String    @unique
   otp       String?
   role      Role      @default(MANAGER)
-  company   Company?  @relation(fields: [companyId], references: [id])
+  oxToken   String?
   companyId Int?
-  sessions  Session[]
-  createdAt DateTime  @default(now())
+  company   Company?  @relation(fields: [companyId], references: [id])
+  Session   Session[]
 }
 
 model Company {
   id        Int      @id @default(autoincrement())
-  name      String
+  name      String   @unique
   subdomain String   @unique
   users     User[]
   createdAt DateTime @default(now())

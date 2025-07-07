@@ -17,13 +17,16 @@ export class ProductService {
       throw new BadRequestException('Size cannot be greater than 20');
     }
 
-    if (!user.companyId || !user.token || !user.subdomain) {
+    console.log(user);
+    
+
+    if (!user.companyId || !user.token) {
       throw new UnauthorizedException(
-        'User must be linked to a company with valid token and subdomain',
+        'User must be linked to a company with valid token  to access products',
       );
     }
 
-    const url = `https://${user.subdomain}.ox-sys.com/variations?page=${page}&size=${size}`;
+    const url = `https://demo.ox-sys.com/variations?page=${page}&size=${size}`;
 
     const response = await firstValueFrom(
       this.http.get(url, {
