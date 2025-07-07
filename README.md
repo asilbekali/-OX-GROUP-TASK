@@ -139,11 +139,3 @@ Loyihani AWS serveriga joylashtirish rejalashtirilgan edi, ammo **AWS EC2 (n2) v
 
 MIT License – ochiq manba, istalgan maqsadda foydalanishingiz mumkin.
 
----
-
-## 🎯 OX GROUP topshirig‘i bo‘yicha eslatma
-
-> Bu loyiha 48 soat ichida tayyorlanishi va GitHub orqali taqdim etilishi kerak.  
-> Frontend kerak emas. Kod toza, optimal va to‘liq ishlaydigan bo‘lishi zarur.
-
-**✅ Omad!**
