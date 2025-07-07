@@ -68,12 +68,9 @@ export class AuthService {
         email: true,
         role: true,
         oxToken: true,
-        companyId: true, 
+        companyId: true,
       },
     });
-
-    console.log("update user auth\n", updatedUser);
-    
 
     if (!updatedUser) {
       throw new UnauthorizedException('User not found after update');
