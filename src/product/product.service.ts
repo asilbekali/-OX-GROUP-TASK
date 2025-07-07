@@ -1,25 +1,39 @@
-import { Injectable } from '@nestjs/common';
-import { CreateProductDto } from './dto/create-product.dto';
+// src/product/product.service.ts
+
+import {
+  Injectable,
+  BadRequestException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class ProductService {
-  create(createProductDto: CreateProductDto) {
-    return 'This action adds a new product';
-  }
+  constructor(private readonly http: HttpService) {}
 
-  findAll() {
-    return `This action returns all product`;
-  }
+  async getProducts(user: any, page: number, size: number) {
+    if (size > 20) {
+      throw new BadRequestException('Size cannot be greater than 20');
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
-  }
+    if (!user.companyId || !user.token || !user.subdomain) {
+      throw new UnauthorizedException(
+        'User must be linked to a company with valid token and subdomain',
+      );
+    }
 
-  update(id: number, CreateProductDto: CreateProductDto) {
-    return `This action updates a #${id} product`;
-  }
+    const url = `https://${user.subdomain}.ox-sys.com/variations?page=${page}&size=${size}`;
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+    const response = await firstValueFrom(
+      this.http.get(url, {
+        headers: {
+          Accept: 'application/json',
+          Authorization: user.token,
+        },
+      }),
+    );
+
+    return response.data;
   }
 }
